@@ -45,7 +45,7 @@ shared_examples :lint do
     let(:context) { double(:context) }
 
     it "initializes a context" do
-      expect(ServiceActor::Context).to receive(:build).once.with({ foo: "bar" }) { context }
+      expect(BusinessCase::Context).to receive(:build).once.with({ foo: "bar" }) { context }
 
       instance = interactor.new(foo: "bar")
 
@@ -54,7 +54,7 @@ shared_examples :lint do
     end
 
     it "initializes a blank context if none is given" do
-      expect(ServiceActor::Context).to receive(:build).once.with({}) { context }
+      expect(BusinessCase::Context).to receive(:build).once.with({}) { context }
 
       instance = interactor.new
 
@@ -72,8 +72,18 @@ shared_examples :lint do
       instance.run
     end
 
-    it "rescues failure" do
-      expect(instance).to receive(:run!).and_raise(ServiceActor::Failure)
+    it "rescues failure for this context" do
+      failure = BusinessCase::Failure.new(instance.context)
+      expect(instance).to receive(:run!).and_raise(failure)
+
+      expect {
+        instance.run
+      }.not_to raise_error
+    end
+
+    it "swallows a failure from another context" do
+      failure = BusinessCase::Failure.new(BusinessCase::Context.new)
+      expect(instance).to receive(:run!).and_raise(failure)
 
       expect {
         instance.run
@@ -99,11 +109,11 @@ shared_examples :lint do
     end
 
     it "raises failure" do
-      expect(instance).to receive(:run!).and_raise(ServiceActor::Failure)
+      expect(instance).to receive(:run!).and_raise(BusinessCase::Failure)
 
       expect {
         instance.run!
-      }.to raise_error(ServiceActor::Failure)
+      }.to raise_error(BusinessCase::Failure)
     end
 
     it "raises other errors" do

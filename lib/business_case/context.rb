@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module ServiceActor
-  # Public: The object for tracking state of a ServiceActor's invocation. The
+module BusinessCase
+  # Public: The object for tracking state of a BusinessCase's invocation. The
   # context is used to initialize the actor with the information required
   # for invocation. The actor manipulates the context to produce the result
   # of invocation.
@@ -14,20 +14,20 @@ module ServiceActor
   #
   # Examples
   #
-  #   context = ServiceActor::Context.new
-  #   # => #<ServiceActor::Context>
+  #   context = BusinessCase::Context.new
+  #   # => #<BusinessCase::Context>
   #   context.foo = "bar"
   #   # => "bar"
   #   context
-  #   # => #<ServiceActor::Context foo="bar">
+  #   # => #<BusinessCase::Context foo="bar">
   #   context.hello = "world"
   #   # => "world"
   #   context
-  #   # => #<ServiceActor::Context foo="bar" hello="world">
+  #   # => #<BusinessCase::Context foo="bar" hello="world">
   #   context.foo = "baz"
   #   # => "baz"
   #   context
-  #   # => #<ServiceActor::Context foo="baz" hello="world">
+  #   # => #<BusinessCase::Context foo="baz" hello="world">
   class Context
     # Internal: Initialize a new Context with the given attributes.
     #
@@ -63,6 +63,29 @@ module ServiceActor
     # Returns a Hash representation of the context.
     def to_h
       @table.dup
+    end
+
+    # Public: Support hash pattern matching on context attributes.
+    #
+    # Matches the behavior added to collectiveidea/interactor 3.2.0. success
+    # and failure are included so a pattern can branch on the outcome.
+    # Attribute order is not part of the contract, so array deconstruct is
+    # intentionally not defined.
+    #
+    # keys - Attribute names named by the pattern, or nil for every attribute.
+    #
+    # Examples
+    #
+    #   context = BusinessCase::Context.new(foo: "bar")
+    #   context => { foo:, success: }
+    #   foo
+    #   # => "bar"
+    #
+    # Returns a Hash of the requested attributes, plus success and failure
+    # when those keys are requested or when keys is nil.
+    def deconstruct_keys(keys)
+      attributes = to_h.merge(success: success?, failure: failure?)
+      keys.nil? ? attributes : attributes.slice(*keys)
     end
 
     # Internal: Iterate over each key-value pair in the context.
@@ -114,46 +137,46 @@ module ServiceActor
     end
     private :modifiable
 
-    # Internal: Initialize a ServiceActor::Context or preserve an existing one.
-    # If the argument given is a ServiceActor::Context, the argument is returned.
-    # Otherwise, a new ServiceActor::Context is initialized from the provided
+    # Internal: Initialize a BusinessCase::Context or preserve an existing one.
+    # If the argument given is a BusinessCase::Context, the argument is returned.
+    # Otherwise, a new BusinessCase::Context is initialized from the provided
     # hash.
     #
     # The "build" method is used during actor initialization.
     #
     # context - A Hash whose key/value pairs are used in initializing a new
-    #           ServiceActor::Context object. If an existing ServiceActor::Context
+    #           BusinessCase::Context object. If an existing BusinessCase::Context
     #           is given, it is simply returned. (default: {})
     #
     # Examples
     #
-    #   context = ServiceActor::Context.build(foo: "bar")
-    #   # => #<ServiceActor::Context foo="bar">
+    #   context = BusinessCase::Context.build(foo: "bar")
+    #   # => #<BusinessCase::Context foo="bar">
     #   context.object_id
     #   # => 2170969340
-    #   context = ServiceActor::Context.build(context)
-    #   # => #<ServiceActor::Context foo="bar">
+    #   context = BusinessCase::Context.build(context)
+    #   # => #<BusinessCase::Context foo="bar">
     #   context.object_id
     #   # => 2170969340
     #
-    # Returns the ServiceActor::Context.
+    # Returns the BusinessCase::Context.
     def self.build(context = {})
       self === context ? context : new(context)
     end
 
-    # Public: Whether the ServiceActor::Context is successful. By default, a new
+    # Public: Whether the BusinessCase::Context is successful. By default, a new
     # context is successful and only changes when explicitly failed.
     #
     # The "success?" method is the inverse of the "failure?" method.
     #
     # Examples
     #
-    #   context = ServiceActor::Context.new
-    #   # => #<ServiceActor::Context>
+    #   context = BusinessCase::Context.new
+    #   # => #<BusinessCase::Context>
     #   context.success?
     #   # => true
     #   context.fail!
-    #   # => ServiceActor::Failure: #<ServiceActor::Context>
+    #   # => BusinessCase::Failure: #<BusinessCase::Context>
     #   context.success?
     #   # => false
     #
@@ -162,19 +185,19 @@ module ServiceActor
       !failure?
     end
 
-    # Public: Whether the ServiceActor::Context has failed. By default, a new
+    # Public: Whether the BusinessCase::Context has failed. By default, a new
     # context is successful and only changes when explicitly failed.
     #
     # The "failure?" method is the inverse of the "success?" method.
     #
     # Examples
     #
-    #   context = ServiceActor::Context.new
-    #   # => #<ServiceActor::Context>
+    #   context = BusinessCase::Context.new
+    #   # => #<BusinessCase::Context>
     #   context.failure?
     #   # => false
     #   context.fail!
-    #   # => ServiceActor::Failure: #<ServiceActor::Context>
+    #   # => BusinessCase::Failure: #<BusinessCase::Context>
     #   context.failure?
     #   # => true
     #
@@ -183,7 +206,7 @@ module ServiceActor
       @failure || false
     end
 
-    # Public: Fail the ServiceActor::Context. Failing a context raises an error
+    # Public: Fail the BusinessCase::Context. Failing a context raises an error
     # that may be rescued by the calling actor. The context is also flagged
     # as having failed.
     #
@@ -191,50 +214,83 @@ module ServiceActor
     # into the context before failure.
     #
     # context - A Hash whose key/value pairs are merged into the existing
-    #           ServiceActor::Context instance. (default: {})
+    #           BusinessCase::Context instance. (default: {})
     #
     # Examples
     #
-    #   context = ServiceActor::Context.new
-    #   # => #<ServiceActor::Context>
+    #   context = BusinessCase::Context.new
+    #   # => #<BusinessCase::Context>
     #   context.fail!
-    #   # => ServiceActor::Failure: #<ServiceActor::Context>
+    #   # => BusinessCase::Failure: #<BusinessCase::Context>
     #   context.fail! rescue false
     #   # => false
     #   context.fail!(foo: "baz")
-    #   # => ServiceActor::Failure: #<ServiceActor::Context foo="baz">
+    #   # => BusinessCase::Failure: #<BusinessCase::Context foo="baz">
     #
-    # Raises ServiceActor::Failure initialized with the ServiceActor::Context.
+    # Raises BusinessCase::Failure initialized with the BusinessCase::Context.
     def fail!(context = {})
-      context.each { |key, value| modifiable[key.to_sym] = value }
+      context.each { |key, value| self[key.to_sym] = value }
       @failure = true
+      @failure_keys = context.keys.map { |key| key.to_sym }
       raise Failure, self
     end
 
-    # Internal: Track that a ServiceActor has been called. The "called!" method
+    # Internal: Keys written by the last fail!, plus :error and :errors when
+    # those attributes are already present. Nested cases copy this payload
+    # onto the caller without replacing keys the caller already set.
+    #
+    # Returns a Hash.
+    def failure_payload
+      keys = Array(@failure_keys)
+      snapshot = to_h
+      keys |= [:error, :errors].select { |key| snapshot.key?(key) }
+      keys.uniq.to_h { |key| [key, self[key]] }
+    end
+
+    # Internal: Mark this context failed and copy another's failure payload
+    # onto it. Keys already set here are left alone.
+    #
+    # other - A BusinessCase::Context, or nil.
+    #
+    # Returns nothing.
+    def copy_failure_from(other)
+      @failure = true
+      return if other.nil? || other.equal?(self)
+      return unless other.respond_to?(:to_h)
+
+      payload = other.respond_to?(:failure_payload) ? other.failure_payload : other.to_h.slice(:error, :errors)
+      mine = to_h
+      payload.each do |key, value|
+        next if mine.key?(key)
+
+        self[key] = value
+      end
+    end
+
+    # Internal: Track that a BusinessCase has been called. The "called!" method
     # is used by the actor being invoked with this context. After an
     # actor is successfully called, the actor instance is tracked in
     # the context for the purpose of potential future rollback.
     #
-    # actor - A ServiceActor instance that has been successfully called.
+    # actor - A BusinessCase instance that has been successfully called.
     #
     # Returns nothing.
     def called!(actor)
       _called << actor
     end
 
-    # Public: Roll back the ServiceActor::Context. Any actors to which this
+    # Public: Roll back the BusinessCase::Context. Any actors to which this
     # context has been passed and which have been successfully called are asked
     # to roll themselves back by invoking their "rollback" instance methods.
     #
     # Examples
     #
     #   context = MyActor.call(foo: "bar")
-    #   # => #<ServiceActor::Context foo="baz">
+    #   # => #<BusinessCase::Context foo="baz">
     #   context.rollback!
     #   # => true
     #   context
-    #   # => #<ServiceActor::Context foo="bar">
+    #   # => #<BusinessCase::Context foo="bar">
     #
     # Returns true if rolled back successfully or false if already rolled back.
     def rollback!
@@ -243,22 +299,22 @@ module ServiceActor
       @rolled_back = true
     end
 
-    # Internal: An Array of successfully called ServiceActor instances invoked
-    # against this ServiceActor::Context instance.
+    # Internal: An Array of successfully called BusinessCase instances invoked
+    # against this BusinessCase::Context instance.
     #
     # Examples
     #
-    #   context = ServiceActor::Context.new
-    #   # => #<ServiceActor::Context>
+    #   context = BusinessCase::Context.new
+    #   # => #<BusinessCase::Context>
     #   context._called
     #   # => []
     #
     #   context = MyActor.call(foo: "bar")
-    #   # => #<ServiceActor::Context foo="baz">
+    #   # => #<BusinessCase::Context foo="baz">
     #   context._called
-    #   # => [#<MyActor @context=#<ServiceActor::Context foo="baz">>]
+    #   # => [#<MyActor @context=#<BusinessCase::Context foo="baz">>]
     #
-    # Returns an Array of ServiceActor instances or an empty Array.
+    # Returns an Array of BusinessCase instances or an empty Array.
     def _called
       @called ||= []
     end

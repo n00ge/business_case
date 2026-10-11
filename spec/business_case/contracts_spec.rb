@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-module ServiceActor
+module BusinessCase
   describe Contracts do
     describe "input contracts (expects)" do
       describe "required attributes" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:name).filled(:string)
@@ -46,8 +46,8 @@ module ServiceActor
       describe "optional attributes" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:name).filled(:string)
@@ -85,8 +85,8 @@ module ServiceActor
       describe "type validation" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:count).filled(:integer)
@@ -116,8 +116,8 @@ module ServiceActor
       describe "filled validation" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:items).filled(:array)
@@ -149,8 +149,8 @@ module ServiceActor
         let(:interactor) do
           klass = user_class
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:user).type(klass)
@@ -183,8 +183,8 @@ module ServiceActor
       describe "required outputs" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             ensures do
               required(:result).filled(:string)
@@ -205,8 +205,8 @@ module ServiceActor
 
         it "fails when required output is missing" do
           broken_interactor = Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             ensures do
               required(:result).filled(:string)
@@ -227,8 +227,8 @@ module ServiceActor
       describe "output validation skipped on failure" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             ensures do
               required(:should_exist).filled(:string)
@@ -254,8 +254,8 @@ module ServiceActor
     describe "contract inheritance" do
       let(:base_interactor) do
         Class.new do
-          include ServiceActor
-          include ServiceActor::Contracts
+          include BusinessCase
+          include BusinessCase::Contracts
 
           expects do
             required(:user_id).filled(:integer)
@@ -301,8 +301,8 @@ module ServiceActor
       describe ".format" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:email).filled(:string).format(/\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i)
@@ -331,8 +331,8 @@ module ServiceActor
       describe ".responds_to" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:obj).responds_to(:save!, :valid?)
@@ -363,8 +363,8 @@ module ServiceActor
       describe ".one_of" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:status).one_of("pending", "active", "cancelled")
@@ -393,8 +393,8 @@ module ServiceActor
       describe ".in_range" do
         let(:interactor) do
           Class.new do
-            include ServiceActor
-            include ServiceActor::Contracts
+            include BusinessCase
+            include BusinessCase::Contracts
 
             expects do
               required(:age).filled(:integer).in_range(18..120)
@@ -432,7 +432,7 @@ module ServiceActor
       it "raises error for nil attribute name" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(nil)
@@ -444,7 +444,7 @@ module ServiceActor
       it "raises error for empty attribute name" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:"")
@@ -456,7 +456,7 @@ module ServiceActor
       it "raises error for duplicate attribute declaration" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:name).filled(:string)
@@ -469,7 +469,7 @@ module ServiceActor
       it "raises error for invalid type argument" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:name).type(123)
@@ -481,7 +481,7 @@ module ServiceActor
       it "raises error for invalid format argument" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:email).format("not-a-regex")
@@ -493,7 +493,7 @@ module ServiceActor
       it "raises error for empty responds_to" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:obj).responds_to
@@ -505,7 +505,7 @@ module ServiceActor
       it "raises error for empty one_of" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:status).one_of
@@ -517,7 +517,7 @@ module ServiceActor
       it "raises error for non-Range in_range" do
         expect {
           Class.new do
-            include ServiceActor::Contracts
+            include BusinessCase::Contracts
 
             expects do
               required(:age).in_range("not-a-range")
@@ -530,8 +530,8 @@ module ServiceActor
     describe "rollback on validation failure" do
       let(:interactor) do
         Class.new do
-          include ServiceActor
-          include ServiceActor::Contracts
+          include BusinessCase
+          include BusinessCase::Contracts
 
           ensures do
             required(:output).filled(:string)

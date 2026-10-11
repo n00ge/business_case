@@ -1,8 +1,8 @@
-module Interactor
+module BusinessCase
   describe Hooks do
     describe "#with_hooks" do
       def build_hooked(&block)
-        hooked = Class.new.send(:include, Interactor::Hooks)
+        hooked = Class.new.send(:include, BusinessCase::Hooks)
 
         hooked.class_eval do
           attr_reader :steps

@@ -1,46 +1,46 @@
 # frozen_string_literal: true
 
-module ServiceActor
-  # Public: ServiceActor::Organizer methods. Because ServiceActor::Organizer is a
-  # module, custom ServiceActor::Organizer classes should include
-  # ServiceActor::Organizer rather than inherit from it.
+module BusinessCase
+  # Public: BusinessCase::Organizer methods. Because BusinessCase::Organizer is a
+  # module, custom BusinessCase::Organizer classes should include
+  # BusinessCase::Organizer rather than inherit from it.
   #
   # Examples
   #
   #   class MyOrganizer
-  #     include ServiceActor::Organizer
+  #     include BusinessCase::Organizer
   #
   #     organize ActorOne, ActorTwo
   #   end
   module Organizer
-    # Internal: Install ServiceActor::Organizer's behavior in the given class.
+    # Internal: Install BusinessCase::Organizer's behavior in the given class.
     def self.included(base)
       base.class_eval do
-        include ServiceActor::Base
+        include BusinessCase::Base
 
         extend ClassMethods
         include InstanceMethods
       end
     end
 
-    # Internal: ServiceActor::Organizer class methods.
+    # Internal: BusinessCase::Organizer class methods.
     module ClassMethods
-      # Public: Declare ServiceActors to be invoked as part of the
-      # ServiceActor::Organizer's invocation. These actors are invoked in
+      # Public: Declare BusinessCases to be invoked as part of the
+      # BusinessCase::Organizer's invocation. These actors are invoked in
       # the order in which they are declared.
       #
-      # actors - Zero or more (or an Array of) ServiceActor classes.
+      # actors - Zero or more (or an Array of) BusinessCase classes.
       #
       # Examples
       #
       #   class MyFirstOrganizer
-      #     include ServiceActor::Organizer
+      #     include BusinessCase::Organizer
       #
       #     organize ActorOne, ActorTwo
       #   end
       #
       #   class MySecondOrganizer
-      #     include ServiceActor::Organizer
+      #     include BusinessCase::Organizer
       #
       #     organize [ActorThree, ActorFour]
       #   end
@@ -50,12 +50,12 @@ module ServiceActor
         @organized = actors.flatten
       end
 
-      # Internal: An Array of declared ServiceActors to be invoked.
+      # Internal: An Array of declared BusinessCases to be invoked.
       #
       # Examples
       #
       #   class MyOrganizer
-      #     include ServiceActor::Organizer
+      #     include BusinessCase::Organizer
       #
       #     organize ActorOne, ActorTwo
       #   end
@@ -63,15 +63,15 @@ module ServiceActor
       #   MyOrganizer.organized
       #   # => [ActorOne, ActorTwo]
       #
-      # Returns an Array of ServiceActor classes or an empty Array.
+      # Returns an Array of BusinessCase classes or an empty Array.
       def organized
         @organized ||= []
       end
     end
 
-    # Internal: ServiceActor::Organizer instance methods.
+    # Internal: BusinessCase::Organizer instance methods.
     module InstanceMethods
-      # Internal: Invoke the organized ServiceActors. A ServiceActor::Organizer is
+      # Internal: Invoke the organized BusinessCases. A BusinessCase::Organizer is
       # expected not to define its own "#call" method in favor of this default
       # implementation.
       #

@@ -7,6 +7,6 @@ if ENV["COVERAGE"]
   end
 end
 
-require "service_actor"
+require "business_case"
 
 Dir[File.expand_path("../support/*.rb", __FILE__)].each { |f| require f }

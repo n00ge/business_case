@@ -1,29 +1,32 @@
 # frozen_string_literal: true
 
+require "open3"
+require "rbconfig"
+
 describe "Backward Compatibility" do
   describe "Interactor alias" do
-    it "aliases Interactor to ServiceActor" do
-      expect(Interactor).to eq(ServiceActor)
+    it "aliases Interactor to BusinessCase" do
+      expect(Interactor).to eq(BusinessCase)
     end
 
-    it "aliases Interactor::Context to ServiceActor::Context" do
-      expect(Interactor::Context).to eq(ServiceActor::Context)
+    it "aliases Interactor::Context to BusinessCase::Context" do
+      expect(Interactor::Context).to eq(BusinessCase::Context)
     end
 
-    it "aliases Interactor::Failure to ServiceActor::Failure" do
-      expect(Interactor::Failure).to eq(ServiceActor::Failure)
+    it "aliases Interactor::Failure to BusinessCase::Failure" do
+      expect(Interactor::Failure).to eq(BusinessCase::Failure)
     end
 
-    it "aliases Interactor::Hooks to ServiceActor::Hooks" do
-      expect(Interactor::Hooks).to eq(ServiceActor::Hooks)
+    it "aliases Interactor::Hooks to BusinessCase::Hooks" do
+      expect(Interactor::Hooks).to eq(BusinessCase::Hooks)
     end
 
-    it "aliases Interactor::Organizer to ServiceActor::Organizer" do
-      expect(Interactor::Organizer).to eq(ServiceActor::Organizer)
+    it "aliases Interactor::Organizer to BusinessCase::Organizer" do
+      expect(Interactor::Organizer).to eq(BusinessCase::Organizer)
     end
 
-    it "aliases Interactor::Contracts to ServiceActor::Contracts" do
-      expect(Interactor::Contracts).to eq(ServiceActor::Contracts)
+    it "aliases Interactor::Contracts to BusinessCase::Contracts" do
+      expect(Interactor::Contracts).to eq(BusinessCase::Contracts)
     end
   end
 
@@ -118,9 +121,9 @@ describe "Backward Compatibility" do
   end
 
   describe "mixing old and new namespaces" do
-    it "allows ServiceActor and Interactor to interoperate" do
+    it "allows BusinessCase and Interactor to interoperate" do
       new_style = Class.new do
-        include ServiceActor
+        include BusinessCase
 
         def call
           context.from_new = true
@@ -136,7 +139,7 @@ describe "Backward Compatibility" do
       end
 
       organizer = Class.new do
-        include ServiceActor::Organizer
+        include BusinessCase::Organizer
 
         organize new_style, old_style
       end
@@ -158,7 +161,7 @@ describe "Backward Compatibility" do
       end
 
       consumer = Class.new do
-        include ServiceActor
+        include BusinessCase
 
         def call
           context.consumed = context.data[:key]
@@ -177,4 +180,26 @@ describe "Backward Compatibility" do
       expect(result.consumed).to eq("value")
     end
   end
+
+  describe "require 'interactor'" do
+    it "loads BusinessCase through the deprecated shim" do
+      lib = File.expand_path("../lib", __dir__)
+      _stdout, stderr, status = Open3.capture3(
+        RbConfig.ruby,
+        "-I#{lib}",
+        "-e",
+        <<~RUBY
+          require "interactor"
+          abort "alias missing" unless defined?(Interactor) && Interactor.equal?(BusinessCase)
+          abort "context missing" unless Interactor::Context.equal?(BusinessCase::Context)
+        RUBY
+      )
+
+      expect(status).to be_success, stderr
+    end
+  end
+end
+
+describe Interactor do
+  include_examples :lint
 end
