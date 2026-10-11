@@ -1,4 +1,4 @@
-module Interactor
+module BusinessCase
   describe Context do
     describe ".build" do
       it "converts the given hash to a context" do
@@ -169,6 +169,43 @@ module Interactor
 
       it "is empty by default" do
         expect(context._called).to eq([])
+      end
+    end
+
+    describe "#deconstruct_keys" do
+      let(:context) { Context.build(foo: "bar") }
+
+      it "returns the requested attributes" do
+        expect(context.deconstruct_keys([:foo])).to eq(foo: "bar")
+      end
+
+      it "includes success and failure flags" do
+        expect(context.deconstruct_keys([:success, :failure])).to eq(success: true, failure: false)
+      end
+
+      it "reports failure after fail!" do
+        context.fail!(foo: "baz") rescue nil
+
+        expect(context.deconstruct_keys([:foo, :success, :failure])).to eq(
+          foo: "baz",
+          success: false,
+          failure: true
+        )
+      end
+
+      it "returns every attribute when keys is nil" do
+        expect(context.deconstruct_keys(nil)).to include(foo: "bar", success: true, failure: false)
+      end
+
+      it "matches a hash pattern" do
+        matched = case context
+                  in foo: "bar", success: true, failure: false
+                    true
+                  else
+                    false
+                  end
+
+        expect(matched).to eq(true)
       end
     end
   end

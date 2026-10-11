@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceActor
+module BusinessCase
   # Public: Methods for declaring and validating context contracts.
   # Contracts allow you to specify required and optional attributes
   # with type checking support for both inputs and outputs.
@@ -8,8 +8,8 @@ module ServiceActor
   # Examples
   #
   #   class CreateUser
-  #     include ServiceActor
-  #     include ServiceActor::Contracts
+  #     include BusinessCase
+  #     include BusinessCase::Contracts
   #
   #     expects do
   #       required(:email).filled(:string)
@@ -39,14 +39,14 @@ module ServiceActor
       end
     end
 
-    # Internal: Install ServiceActor::Contracts behavior in the given class.
+    # Internal: Install BusinessCase::Contracts behavior in the given class.
     def self.included(base)
       base.class_eval do
         extend ClassMethods
       end
     end
 
-    # Internal: ServiceActor::Contracts class methods.
+    # Internal: BusinessCase::Contracts class methods.
     module ClassMethods
       # Public: Define an input contract for the actor's context.
       # The contract is validated before the actor is called.
@@ -117,10 +117,10 @@ module ServiceActor
     end
 
     # Internal: Validate the input contract before the actor is called.
-    # This is called by the main ServiceActor module's run! method.
+    # This is called by the main BusinessCase module's run! method.
     #
     # Returns nothing.
-    # Raises ServiceActor::Failure if validation fails.
+    # Raises BusinessCase::Failure if validation fails.
     def validate_input_contract!
       return unless self.class.contract
 
@@ -129,10 +129,10 @@ module ServiceActor
     end
 
     # Internal: Validate the output contract after the actor is called.
-    # This is called by the main ServiceActor module's run! method.
+    # This is called by the main BusinessCase module's run! method.
     #
     # Returns nothing.
-    # Raises ServiceActor::Failure if validation fails.
+    # Raises BusinessCase::Failure if validation fails.
     def validate_output_contract!
       return unless self.class.output_contract
       return unless context.success?
@@ -184,7 +184,7 @@ module ServiceActor
 
       # Internal: Validate a context against this contract.
       #
-      # context - A ServiceActor::Context to validate.
+      # context - A BusinessCase::Context to validate.
       #
       # Returns an Array of error messages (empty if valid).
       def validate(context)
@@ -392,7 +392,7 @@ module ServiceActor
 
       # Internal: Validate this rule against a context.
       #
-      # context - A ServiceActor::Context to validate.
+      # context - A BusinessCase::Context to validate.
       #
       # Returns an Array of error messages (empty if valid).
       def validate(context)

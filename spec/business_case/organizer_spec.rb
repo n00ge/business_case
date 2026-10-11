@@ -1,4 +1,4 @@
-module Interactor
+module BusinessCase
   describe Organizer do
     include_examples :lint
 

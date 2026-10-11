@@ -1,51 +1,45 @@
-# ServiceActor
+# BusinessCase
 
-[![Gem Version](https://img.shields.io/gem/v/service-actor.svg?style=flat-square)](http://rubygems.org/gems/service-actor)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/n00ge/service-actor/ci.yml?style=flat-square)](https://github.com/n00ge/service-actor/actions)
+Clean Architecture use case interactors for Ruby.
 
-Simple service objects (actors) with type-safe contracts for Ruby 3.x.
+Robert C. Martin describes a use case interactor as the object that carries out one application-specific business rule: it takes a request, coordinates entities, and returns a response. [collectiveidea/interactor](https://github.com/collectiveidea/interactor), by [Collective Idea](https://collectiveidea.com), brought that model to Ruby with a shared context, organizers, hooks, and rollback.
 
-## Attribution
+BusinessCase is a modernized fork of that gem. The module name matches the role. Each object is one business case. The call API is the interactor API, OpenStruct is gone, and `expects` / `ensures` add type-safe contracts. There are no runtime dependencies.
 
-ServiceActor is a modernized fork of [collectiveidea/interactor](https://github.com/collectiveidea/interactor), originally created by [Collective Idea](https://collectiveidea.com). We are grateful for their pioneering work on the interactor pattern in Ruby.
-
-**Key differences from the original:**
-- Ruby 3.x compatibility (no deprecated OpenStruct)
-- Type-safe contracts with `expects`/`ensures` DSL
-- Zero external dependencies
-- Modern gem infrastructure
+Source for this release is [n00ge/interactor](https://github.com/n00ge/interactor). The repository can be renamed to `business_case` later.
 
 ## Getting Started
 
-Add ServiceActor to your Gemfile and `bundle install`.
+Add BusinessCase to your Gemfile and `bundle install`.
 
 ```ruby
-gem "service-actor", "~> 1.0"
+gem "business_case", "~> 1.0"
 ```
 
 ## Migration from collectiveidea/interactor
 
-ServiceActor provides backward compatibility aliases for `Interactor`. Your existing code should continue to work:
+`Interactor` is the same module as `BusinessCase` for this release. There is no `ServiceActor` constant.
 
 ```ruby
-# These work the same
-include Interactor           # Still works (aliased)
-include ServiceActor         # New preferred way
+require "business_case" # preferred
+require "interactor"    # deprecated shim; removed in a later release
 
-# These are equivalent
-Interactor::Context          # Aliased to ServiceActor::Context
-Interactor::Failure          # Aliased to ServiceActor::Failure
-Interactor::Organizer        # Aliased to ServiceActor::Organizer
-Interactor::Contracts        # Aliased to ServiceActor::Contracts
+include BusinessCase    # preferred
+include Interactor      # same module
+
+Interactor::Context     # BusinessCase::Context
+Interactor::Failure     # BusinessCase::Failure
+Interactor::Organizer   # BusinessCase::Organizer
+Interactor::Contracts   # BusinessCase::Contracts
 ```
 
-We recommend gradually updating your code to use `ServiceActor` for clarity.
+Prefer `BusinessCase` in new code. See [UPGRADING.md](UPGRADING.md).
 
-## What is a ServiceActor?
+## What is a BusinessCase?
 
-A service actor is a simple, single-purpose object.
+A business case is a simple, single-purpose object.
 
-Service actors are used to encapsulate your application's
+Business cases are used to encapsulate your application's
 [business logic](http://en.wikipedia.org/wiki/Business_logic). Each actor
 represents one thing that your application *does*.
 
@@ -103,11 +97,9 @@ context.success? # => false
 
 #### Dealing with Failure
 
-`context.fail!` always throws an exception of type `ServiceActor::Failure`.
+`context.fail!` always raises `BusinessCase::Failure`.
 
-Normally, however, these exceptions are not seen. In the recommended usage, the controller invokes the actor using the class method `call`, then checks the `success?` method of the context.
-
-This works because the `call` class method swallows exceptions. When unit testing an actor, if calling custom business logic methods directly and bypassing `call`, be aware that `fail!` will generate such exceptions.
+Normally that exception is not seen. Call the use case with `call`, then check `success?` on the context. `call` swallows a failure for this context and re-raises a failure that belongs to a different context. `call!` always raises. When a test invokes `call` and then reads the context, a failed context is the expected result, not an exception.
 
 See *Actors in the Controller*, below, for the recommended usage of `call` and `success?`.
 
@@ -121,8 +113,8 @@ Use `expects` to validate inputs before the actor runs:
 
 ```ruby
 class CreateUser
-  include ServiceActor
-  include ServiceActor::Contracts
+  include BusinessCase
+  include BusinessCase::Contracts
 
   expects do
     required(:email).filled(:string)
@@ -151,8 +143,8 @@ Use `ensures` to validate outputs after the actor runs successfully:
 
 ```ruby
 class CreateUser
-  include ServiceActor
-  include ServiceActor::Contracts
+  include BusinessCase
+  include BusinessCase::Contracts
 
   expects do
     required(:email).filled(:string)
@@ -245,7 +237,7 @@ end
 
 ```ruby
 class ProcessPayment
-  include ServiceActor::Contracts
+  include BusinessCase::Contracts
 
   expects do
     required(:user).type(User)
@@ -401,7 +393,7 @@ Your application could use an actor to authenticate a user.
 
 ```ruby
 class AuthenticateUser
-  include ServiceActor
+  include BusinessCase
 
   def call
     if user = User.authenticate(context.email, context.password)
@@ -414,7 +406,7 @@ class AuthenticateUser
 end
 ```
 
-To define an actor, simply create a class that includes the `ServiceActor`
+To define an actor, simply create a class that includes the `BusinessCase`
 module and give it a `call` instance method. The actor can access its
 `context` from within `call`.
 
@@ -472,7 +464,7 @@ argument is converted to the actor instance's context. The `call` instance
 method is invoked along with any hooks that the actor might define.
 Finally, the context (along with any changes made to it) is returned.
 
-## When to Use a ServiceActor
+## When to Use a BusinessCase
 
 Given the user authentication example, your controller may look like:
 
@@ -545,16 +537,16 @@ to the actor.
 
 ## Kinds of Actors
 
-There are two kinds of actors built into ServiceActor: basic
+There are two kinds of actors built into BusinessCase: basic
 actors and organizers.
 
 ### Actors
 
-A basic actor is a class that includes `ServiceActor` and defines `call`.
+A basic actor is a class that includes `BusinessCase` and defines `call`.
 
 ```ruby
 class AuthenticateUser
-  include ServiceActor
+  include BusinessCase
 
   def call
     if user = User.authenticate(context.email, context.password)
@@ -577,7 +569,7 @@ purpose is to run *other* actors.
 
 ```ruby
 class PlaceOrder
-  include ServiceActor::Organizer
+  include BusinessCase::Organizer
 
   organize CreateOrder, ChargeCard, SendThankYou
 end
@@ -622,7 +614,7 @@ actors:
 
 ```ruby
 class CreateOrder
-  include ServiceActor
+  include BusinessCase
 
   def call
     order = Order.create(order_params)
@@ -651,7 +643,7 @@ thing. Take the following actor:
 
 ```ruby
 class AuthenticateUser
-  include ServiceActor
+  include BusinessCase
 
   def call
     if user = User.authenticate(context.email, context.password)
@@ -726,7 +718,7 @@ Imagine the actor otherwise:
 
 ```ruby
 class AuthenticateUser
-  include ServiceActor
+  include BusinessCase
 
   def call
     user = User.where(email: context.email).first
@@ -846,7 +838,7 @@ application because all of the magic happens in the actor.
 
 ### Rails
 
-We love Rails, and we use ServiceActor with Rails. We put our actors in `app/actors` and we name them as verbs:
+We love Rails, and we use BusinessCase with Rails. We put our actors in `app/actors` and we name them as verbs:
 
 * `AddProductToCart`
 * `AuthenticateUser`
@@ -856,7 +848,7 @@ We love Rails, and we use ServiceActor with Rails. We put our actors in `app/act
 
 ## Contributions
 
-ServiceActor is open source and contributions from the community are encouraged!
+BusinessCase is open source and contributions from the community are encouraged!
 No contribution is too small.
 
 ## Thank You
@@ -866,8 +858,8 @@ Special thanks to:
 - **[Collective Idea](https://collectiveidea.com)** for creating the original [interactor](https://github.com/collectiveidea/interactor) gem
 - **[Attila Domokos](https://github.com/adomokos)** for [LightService](https://github.com/adomokos/light-service), which inspired the original interactor gem
 
-ServiceActor builds on the excellent foundation laid by these projects.
+BusinessCase builds on the excellent foundation laid by these projects.
 
 ## License
 
-ServiceActor is released under the [MIT License](MIT-LICENSE).
+BusinessCase is released under the [MIT License](LICENSE.txt).

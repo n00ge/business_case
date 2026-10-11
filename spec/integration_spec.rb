@@ -1,12 +1,12 @@
 describe "Integration" do
   def build_interactor(&block)
-    interactor = Class.new.send(:include, Interactor)
+    interactor = Class.new.send(:include, BusinessCase)
     interactor.class_eval(&block) if block
     interactor
   end
 
   def build_organizer(options = {}, &block)
-    organizer = Class.new.send(:include, Interactor::Organizer)
+    organizer = Class.new.send(:include, BusinessCase::Organizer)
     organizer.organize(options[:organize]) if options[:organize]
     organizer.class_eval(&block) if block
     organizer
@@ -286,7 +286,7 @@ describe "Integration" do
     end
   }
 
-  let(:context) { Interactor::Context.new(steps: []) }
+  let(:context) { BusinessCase::Context.new(steps: []) }
 
   context "when successful" do
     it "calls and runs hooks in the proper sequence" do

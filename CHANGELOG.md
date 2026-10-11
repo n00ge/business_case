@@ -1,29 +1,32 @@
 # Changelog
 
-## 1.0.0 / 2024
+## 1.0.0 / 2026-10-11
 
-ServiceActor is a modernized fork of [collectiveidea/interactor](https://github.com/collectiveidea/interactor).
+BusinessCase is a modernized fork of [collectiveidea/interactor](https://github.com/collectiveidea/interactor). This is the first release under the `business_case` name.
 
 ### New Features
 
+* **Clean Architecture naming** - Gem `business_case`, module `BusinessCase`
 * **Type-safe contracts** - Input validation with `expects` DSL
 * **Output contracts** - Output validation with `ensures` DSL
 * **Custom validators** - `format()`, `responds_to()`, `one_of()`, `in_range()`
 * **Contract inheritance** - Contracts inherited from parent classes
-* **Backward compatibility** - `Interactor` aliased to `ServiceActor`
+* **Pattern matching** - `Context#deconstruct_keys`, including `success` and `failure` (from interactor 3.2.0)
+* **Nested failures** - `call` re-raises a `Failure` that belongs to a different context (from interactor 3.2.0)
+* **Backward compatibility** - `Interactor` is aliased to `BusinessCase` for this release, and `require "interactor"` still loads the library
 
 ### Breaking Changes
 
-* Ruby 3.0+ required
-* OpenStruct removed (deprecated in Ruby 3.2+)
+* Ruby 3.2+ required
+* OpenStruct removed
 * Custom Context implementation (API-compatible)
+* No `ServiceActor` constant. That name belongs to the `service_actor` gem.
 
 ### Improvements
 
-* Zero external dependencies
-* Modern gem infrastructure
-* Comprehensive test suite (167+ tests)
-* Full TomDoc documentation
+* Zero runtime dependencies
+* GitHub Actions on Ruby 3.2, 3.3, 3.4, and 4.0
+* Travis CI removed
 
 ---
 

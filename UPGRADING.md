@@ -1,15 +1,15 @@
-# Migrating from collectiveidea/interactor to ServiceActor
+# Migrating from collectiveidea/interactor to BusinessCase
 
-ServiceActor is a modernized fork of [collectiveidea/interactor](https://github.com/collectiveidea/interactor). This guide will help you migrate your existing interactor code to ServiceActor.
+BusinessCase is a modernized fork of [collectiveidea/interactor](https://github.com/collectiveidea/interactor). This guide migrates existing interactor code to BusinessCase.
 
 ## Quick Migration
 
-ServiceActor provides **backward compatibility aliases** for seamless migration. Your existing code should continue to work without changes:
+`Interactor` is an alias of `BusinessCase` for this release. There is no `ServiceActor` alias. Existing classes keep working:
 
 ```ruby
 # This still works
 class AuthenticateUser
-  include Interactor  # Aliased to ServiceActor
+  include Interactor  # Aliased to BusinessCase
 
   def call
     # Your existing code works as-is
@@ -17,16 +17,16 @@ class AuthenticateUser
 end
 
 # Failure handling still works
-rescue Interactor::Failure => e  # Aliased to ServiceActor::Failure
+rescue Interactor::Failure => e  # Aliased to BusinessCase::Failure
 
 # Organizers still work
 class PlaceOrder
-  include Interactor::Organizer  # Aliased to ServiceActor::Organizer
+  include Interactor::Organizer  # Aliased to BusinessCase::Organizer
 end
 
 # Contracts work too
 class CreateUser
-  include Interactor::Contracts  # Aliased to ServiceActor::Contracts
+  include Interactor::Contracts  # Aliased to BusinessCase::Contracts
 end
 ```
 
@@ -39,7 +39,7 @@ end
 gem 'interactor', '~> 3.0'
 
 # Add this
-gem 'service-actor', '~> 1.0'
+gem 'business_case', '~> 1.0'
 ```
 
 2. **Run bundle update:**
@@ -52,16 +52,17 @@ bundle install
 
 ## Gradual Migration (Recommended)
 
-While backward compatibility aliases are provided, we recommend gradually updating your code to use `ServiceActor` for clarity:
+The `Interactor` alias is for this release. New code should use `BusinessCase`:
 
 ### Step 1: Update requires (if explicit)
 
 ```ruby
-# Old
-require 'interactor'
+# Deprecated for this release. lib/interactor.rb loads BusinessCase and will
+# be removed later.
+require "interactor"
 
-# New
-require 'service_actor'
+# Preferred
+require "business_case"
 ```
 
 ### Step 2: Update module includes
@@ -74,7 +75,7 @@ end
 
 # New
 class AuthenticateUser
-  include ServiceActor
+  include BusinessCase
 end
 ```
 
@@ -88,7 +89,7 @@ end
 
 # New
 class PlaceOrder
-  include ServiceActor::Organizer
+  include BusinessCase::Organizer
 end
 ```
 
@@ -99,7 +100,7 @@ end
 rescue Interactor::Failure => e
 
 # New
-rescue ServiceActor::Failure => e
+rescue BusinessCase::Failure => e
 ```
 
 ### Step 5: Update directory structure (optional)
@@ -120,7 +121,7 @@ app/actors/
 
 ### Ruby Version Requirement
 
-ServiceActor requires **Ruby 3.0.0 or higher**. If you're using an older Ruby version, you must upgrade first.
+BusinessCase requires **Ruby 3.0.0 or higher**. If you're using an older Ruby version, you must upgrade first.
 
 ```ruby
 # .ruby-version
@@ -135,7 +136,7 @@ The `Context` class no longer inherits from `OpenStruct` (which is deprecated in
 
 ```ruby
 # All of these still work exactly as before
-context = ServiceActor::Context.new(foo: "bar")
+context = BusinessCase::Context.new(foo: "bar")
 context.foo          # => "bar"
 context.baz = "qux"  # Dynamic setters still work
 context[:foo]        # => "bar" (hash-like access still works)
@@ -151,14 +152,14 @@ context[:foo]        # => "bar" (hash-like access still works)
 
 ### Type-Safe Contracts
 
-ServiceActor introduces a powerful **Contracts** system for validating inputs and outputs:
+BusinessCase introduces a powerful **Contracts** system for validating inputs and outputs:
 
 #### Input Contracts (expects)
 
 ```ruby
 class CreateUser
-  include ServiceActor
-  include ServiceActor::Contracts
+  include BusinessCase
+  include BusinessCase::Contracts
 
   expects do
     required(:email).filled(:string)
@@ -182,8 +183,8 @@ result.errors    # => ["email is required but missing"]
 
 ```ruby
 class CreateUser
-  include ServiceActor
-  include ServiceActor::Contracts
+  include BusinessCase
+  include BusinessCase::Contracts
 
   expects do
     required(:email).filled(:string)
@@ -238,7 +239,7 @@ Contracts are inherited from parent classes:
 
 ```ruby
 class BaseActor
-  include ServiceActor::Contracts
+  include BusinessCase::Contracts
 
   expects do
     required(:user).type(User)
@@ -267,7 +268,7 @@ end
 
 ## Comparison with interactor-contracts gem
 
-If you were using the `interactor-contracts` gem, note that ServiceActor's contracts are:
+If you were using the `interactor-contracts` gem, note that BusinessCase's contracts are:
 
 - **Built-in** - No additional gem needed
 - **Zero dependencies** - No dry-validation required
@@ -282,6 +283,6 @@ If you encounter any issues during the migration:
 1. Check that you're running Ruby 3.0+
 2. Ensure all dependencies are up to date with `bundle install`
 3. Review the contract examples if using the new Contracts feature
-4. Open an issue on [GitHub](https://github.com/n00ge/service-actor/issues) if you find a bug
+4. Open an issue on [GitHub](https://github.com/n00ge/interactor/issues) if you find a bug
 
 For more examples and documentation, see the [README](README.md).

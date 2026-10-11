@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-module ServiceActor
-  # Internal: Methods relating to supporting hooks around ServiceActor invocation.
+module BusinessCase
+  # Internal: Methods relating to supporting hooks around BusinessCase invocation.
   module Hooks
-    # Internal: Install ServiceActor's behavior in the given class.
+    # Internal: Install BusinessCase's behavior in the given class.
     def self.included(base)
       base.class_eval do
         extend ClassMethods
       end
     end
 
-    # Internal: ServiceActor::Hooks class methods.
+    # Internal: BusinessCase::Hooks class methods.
     module ClassMethods
-      # Public: Declare hooks to run around ServiceActor invocation. The around
+      # Public: Declare hooks to run around BusinessCase invocation. The around
       # method may be called multiple times; subsequent calls append declared
       # hooks to existing around hooks.
       #
@@ -26,7 +26,7 @@ module ServiceActor
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     around :time_execution
       #
@@ -55,7 +55,7 @@ module ServiceActor
         hooks.each { |hook| around_hooks.push(hook) }
       end
 
-      # Public: Declare hooks to run before ServiceActor invocation. The before
+      # Public: Declare hooks to run before BusinessCase invocation. The before
       # method may be called multiple times; subsequent calls append declared
       # hooks to existing before hooks.
       #
@@ -67,7 +67,7 @@ module ServiceActor
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     before :set_start_time
       #
@@ -92,7 +92,7 @@ module ServiceActor
         hooks.each { |hook| before_hooks.push(hook) }
       end
 
-      # Public: Declare hooks to run after ServiceActor invocation. The after
+      # Public: Declare hooks to run after BusinessCase invocation. The after
       # method may be called multiple times; subsequent calls prepend declared
       # hooks to existing after hooks.
       #
@@ -104,7 +104,7 @@ module ServiceActor
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     after :set_finish_time
       #
@@ -129,13 +129,13 @@ module ServiceActor
         hooks.each { |hook| after_hooks.unshift(hook) }
       end
 
-      # Internal: An Array of declared hooks to run around ServiceActor
+      # Internal: An Array of declared hooks to run around BusinessCase
       # invocation. The hooks appear in the order in which they will be run.
       #
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     around :time_execution, :use_transaction
       #   end
@@ -148,13 +148,13 @@ module ServiceActor
         @around_hooks ||= []
       end
 
-      # Internal: An Array of declared hooks to run before ServiceActor
+      # Internal: An Array of declared hooks to run before BusinessCase
       # invocation. The hooks appear in the order in which they will be run.
       #
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     before :set_start_time, :say_hello
       #   end
@@ -167,13 +167,13 @@ module ServiceActor
         @before_hooks ||= []
       end
 
-      # Internal: An Array of declared hooks to run before ServiceActor
+      # Internal: An Array of declared hooks to run before BusinessCase
       # invocation. The hooks appear in the order in which they will be run.
       #
       # Examples
       #
       #   class MyActor
-      #     include ServiceActor
+      #     include BusinessCase
       #
       #     after :set_finish_time, :say_goodbye
       #   end
@@ -195,7 +195,7 @@ module ServiceActor
     # Examples
     #
     #   class MyProcessor
-    #     include ServiceActor::Hooks
+    #     include BusinessCase::Hooks
     #
     #     def process_with_hooks
     #       with_hooks do
