@@ -97,9 +97,17 @@ context.success? # => false
 
 #### Dealing with Failure
 
-`context.fail!` always raises `BusinessCase::Failure`.
+`context.fail!` raises `BusinessCase::Failure`.
 
-Normally that exception is not seen. Call the use case with `call`, then check `success?` on the context. `call` swallows a failure for this context and re-raises a failure that belongs to a different context. `call!` always raises. When a test invokes `call` and then reads the context, a failed context is the expected result, not an exception.
+`call` does not raise that failure. It rolls the context back, leaves the context failed, and returns it. Check `success?` or `failure?`. `call!` raises `BusinessCase::Failure` whose context is the case you invoked.
+
+#### Nesting
+
+`Inner.call!(...)` inside `call` makes the inner failure a failure of the outer case. The outer context is marked failed. Keys from the inner `fail!` (`error`, `errors`, and any other keys passed to it) are copied onto the outer context only when the outer does not already have them. The outer's own keys stay put. Rollback then runs for the outer context, the same as when the outer calls `fail!` itself.
+
+`Outer.call` returns that failed outer context. `Outer.call!` raises a failure for the outer context. The inner failure is `error.cause`, so the inner context is still reachable.
+
+`Inner.call(...)` does not raise. It returns the inner context, including a failed one. The outer case has to read that result and call `fail!` itself if the failure should propagate. Ignoring the result leaves the outer case successful. The inner context is not merged into the outer one.
 
 See *Actors in the Controller*, below, for the recommended usage of `call` and `success?`.
 

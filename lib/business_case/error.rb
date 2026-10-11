@@ -5,7 +5,8 @@ module BusinessCase
   # a copy of the failed context for debugging purposes.
   class Failure < StandardError
     # Internal: Gets the BusinessCase::Context of the BusinessCase::Failure
-    # instance.
+    # instance. When this failure wraps a nested case, #cause is that case's
+    # Failure and #context is the caller's context.
     attr_reader :context
 
     # Internal: Initialize a BusinessCase::Failure.

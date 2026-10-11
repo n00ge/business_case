@@ -12,7 +12,7 @@ BusinessCase is a modernized fork of [collectiveidea/interactor](https://github.
 * **Custom validators** - `format()`, `responds_to()`, `one_of()`, `in_range()`
 * **Contract inheritance** - Contracts inherited from parent classes
 * **Pattern matching** - `Context#deconstruct_keys`, including `success` and `failure` (from interactor 3.2.0)
-* **Nested failures** - `call` re-raises a `Failure` that belongs to a different context (from interactor 3.2.0)
+* **Nested failures** - `call` never raises a domain failure. `Inner.call!` inside a case fails the outer context, copies the inner `fail!` keys onto it without replacing the outer's own keys, rolls the outer context back, and leaves the inner failure on `Failure#cause`. `Inner.call` returns its own context and does not fail the caller when that result is ignored. Organizers that share one context are unchanged.
 * **Backward compatibility** - `Interactor` is aliased to `BusinessCase` for this release, and `require "interactor"` still loads the library
 
 ### Breaking Changes

@@ -229,9 +229,42 @@ module BusinessCase
     #
     # Raises BusinessCase::Failure initialized with the BusinessCase::Context.
     def fail!(context = {})
-      context.each { |key, value| modifiable[key.to_sym] = value }
+      context.each { |key, value| self[key.to_sym] = value }
       @failure = true
+      @failure_keys = context.keys.map { |key| key.to_sym }
       raise Failure, self
+    end
+
+    # Internal: Keys written by the last fail!, plus :error and :errors when
+    # those attributes are already present. Nested cases copy this payload
+    # onto the caller without replacing keys the caller already set.
+    #
+    # Returns a Hash.
+    def failure_payload
+      keys = Array(@failure_keys)
+      snapshot = to_h
+      keys |= [:error, :errors].select { |key| snapshot.key?(key) }
+      keys.uniq.to_h { |key| [key, self[key]] }
+    end
+
+    # Internal: Mark this context failed and copy another's failure payload
+    # onto it. Keys already set here are left alone.
+    #
+    # other - A BusinessCase::Context, or nil.
+    #
+    # Returns nothing.
+    def copy_failure_from(other)
+      @failure = true
+      return if other.nil? || other.equal?(self)
+      return unless other.respond_to?(:to_h)
+
+      payload = other.respond_to?(:failure_payload) ? other.failure_payload : other.to_h.slice(:error, :errors)
+      mine = to_h
+      payload.each do |key, value|
+        next if mine.key?(key)
+
+        self[key] = value
+      end
     end
 
     # Internal: Track that a BusinessCase has been called. The "called!" method

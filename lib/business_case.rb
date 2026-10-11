@@ -116,16 +116,14 @@ module BusinessCase
     # within the context. If the context is failed or any error is raised, the
     # context is rolled back.
     #
-    # A BusinessCase::Failure for this context is swallowed, which is what
-    # makes BusinessCase.call return a failed context. A failure raised for a
-    # different context is rolled back here and then re-raised.
+    # BusinessCase.call never raises a domain failure. run swallows every
+    # BusinessCase::Failure, including one raised for a nested case's context.
+    # run! has already recorded that failure on this context.
     #
     # Returns nothing.
-    # Raises BusinessCase::Failure when the failure belongs to another context.
     def run
       run!
-    rescue Failure => error
-      raise unless error.context.equal?(context)
+    rescue Failure
     end
 
     # Internal: Invoke a BusinessCase instance along with all defined hooks. The
@@ -148,6 +146,11 @@ module BusinessCase
     # exception. If the context is failed during invocation of the actor,
     # the BusinessCase::Failure is raised.
     #
+    # A Failure raised from inside call, for this context or another one, fails
+    # this context. A nested context's failure payload is copied onto this
+    # context without replacing keys already set here. The raised failure's
+    # context is this context. The nested failure is available as #cause.
+    #
     # Returns nothing.
     # Raises BusinessCase::Failure if the context is failed.
     def run!
@@ -157,6 +160,10 @@ module BusinessCase
         context.called!(self)
         validate_output_contract! if respond_to?(:validate_output_contract!, true)
       end
+    rescue Failure => error
+      failure = failure_for_this_context(error)
+      context.rollback!
+      raise failure
     rescue
       context.rollback!
       raise
@@ -176,6 +183,18 @@ module BusinessCase
     #
     # Returns nothing.
     def rollback
+    end
+
+    private
+
+    # Internal: Return a Failure for this context. A failure that already
+    # belongs here is returned unchanged. A nested failure is copied onto this
+    # context and wrapped so the caller sees this context.
+    def failure_for_this_context(error)
+      return error if error.context.equal?(context)
+
+      context.copy_failure_from(error.context)
+      Failure.new(context)
     end
   end
 

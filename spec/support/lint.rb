@@ -81,13 +81,13 @@ shared_examples :lint do
       }.not_to raise_error
     end
 
-    it "re-raises a failure from another context" do
+    it "swallows a failure from another context" do
       failure = BusinessCase::Failure.new(BusinessCase::Context.new)
       expect(instance).to receive(:run!).and_raise(failure)
 
       expect {
         instance.run
-      }.to raise_error(failure)
+      }.not_to raise_error
     end
 
     it "raises other errors" do
