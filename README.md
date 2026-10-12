@@ -6,7 +6,7 @@ Robert C. Martin describes a use case interactor as the object that carries out 
 
 BusinessCase is a modernized fork of that gem. The module name matches the role. Each object is one business case. The call API is the interactor API, OpenStruct is gone, and `expects` / `ensures` add type-safe contracts. There are no runtime dependencies.
 
-Source for this release is [n00ge/business_case](https://github.com/n00ge/business_case). The default branch is `master`.
+Source for this release is [n00ge/business_case](https://github.com/n00ge/business_case). The default branch is `main`.
 
 ## Getting Started
 

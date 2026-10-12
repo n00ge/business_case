@@ -51,7 +51,7 @@ documentation, are convinced this behavior is a bug, please:
 
 ### Setup
 
-The default branch is `master`.
+The default branch is `main`.
 
 ```bash
 git clone https://github.com/n00ge/business_case.git
