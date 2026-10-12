@@ -1,5 +1,6 @@
 name: CI
 
+# The default branch is master. Renaming it to main was not applied.
 on:
   push:
   pull_request:

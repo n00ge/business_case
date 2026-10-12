@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.email       = "n00ge@github.com"
   spec.summary     = "Clean Architecture use case interactors for Ruby"
   spec.description = "Clean Architecture use case interactors for Ruby. A modernized fork of collectiveidea/interactor with type-safe contracts and no runtime dependencies."
-  spec.homepage    = "https://github.com/n00ge/interactor"
+  spec.homepage    = "https://github.com/n00ge/business_case"
   spec.license     = "MIT"
 
   spec.required_ruby_version = ">= 3.2.0"
@@ -26,9 +26,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", ">= 13.0"
 
   spec.metadata = {
-    "bug_tracker_uri" => "https://github.com/n00ge/interactor/issues",
-    "changelog_uri" => "https://github.com/n00ge/interactor/blob/master/CHANGELOG.md",
-    "source_code_uri" => "https://github.com/n00ge/interactor",
+    "bug_tracker_uri" => "https://github.com/n00ge/business_case/issues",
+    "changelog_uri" => "https://github.com/n00ge/business_case/blob/master/CHANGELOG.md",
+    "source_code_uri" => "https://github.com/n00ge/business_case",
     "rubygems_mfa_required" => "true"
   }
 end
