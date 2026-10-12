@@ -283,6 +283,6 @@ If you encounter any issues during the migration:
 1. Check that you're running Ruby 3.0+
 2. Ensure all dependencies are up to date with `bundle install`
 3. Review the contract examples if using the new Contracts feature
-4. Open an issue on [GitHub](https://github.com/n00ge/interactor/issues) if you find a bug
+4. Open an issue on [GitHub](https://github.com/n00ge/business_case/issues) if you find a bug
 
 For more examples and documentation, see the [README](README.md).
